@@ -1,0 +1,11 @@
+services:
+  ping-net-service:
+    container_name: ping-net-service
+    build:
+      context: ../
+      dockerfile: .docker/Dockerfile
+    restart: unless-stopped
+    volumes:
+      - path-to-appsettings.json:/app/appsettings.json
+    ports:
+      - "5144:8080"

@@ -39,4 +39,9 @@
       </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include=".docker\docker-compose.yml" />
+      <Content Include=".docker\Dockerfile" />
+    </ItemGroup>
+
 </Project>
