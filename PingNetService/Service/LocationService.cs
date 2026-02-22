@@ -16,23 +16,45 @@ public class LocationService(
     {
         logger.LogTrace("AddPingLocation({Name}, {IpAddress}, {RegionCode}, {CountryCode})", name, ipAddress, regionCode, countryCode);
 
-        var countryProvider = new CountryProvider();
-        var country = countryProvider.GetCountry(countryCode);
-        var continent = country.Region.ToString();
+        var existing = await db.Locations
+            .Where(l => l.CountryCode == countryCode && l.RegionCode == regionCode && l.CountryCode == countryCode)
+            .FirstOrDefaultAsync();
 
-        var location = new LocationEntity
+        // allow updates only for existing IP or if the new ping is better than the existing one
+        if (existing != null && existing.IpAddress != ipAddress && existing.PingMs < pingMs)
         {
-            Name = name,
-            IpAddress = ipAddress,
-            RegionCode = regionCode,
-            CountryCode = countryCode,
-            ContinentName = continent,
-            PingMs = pingMs
-        };
+            throw new RpcException(new Status(StatusCode.AlreadyExists, "Location in this region for lower ping already exists"));
+        }
 
-        db.Locations.Add(location);
+        if (existing != null)
+        {
+            existing.IpAddress = ipAddress;
+            existing.PingMs = pingMs;
+            existing.Name = name;
+            
+            db.Locations.Update(existing);
+        }
+        else
+        {
+            var countryProvider = new CountryProvider();
+            var country = countryProvider.GetCountry(countryCode);
+            var continent = country.Region.ToString();
+        
+            var location = new LocationEntity
+            {
+                Name = name,
+                IpAddress = ipAddress,
+                RegionCode = regionCode,
+                CountryCode = countryCode,
+                ContinentName = continent,
+                PingMs = pingMs
+            };
+
+            db.Locations.Add(location);
+            existing = location;
+        }
         await db.SaveChangesAsync();
-        return location;
+        return existing;
     }
 
     public async Task RemovePingLocation(string ipAddress)

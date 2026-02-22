@@ -25,6 +25,9 @@ service PingNet {
     // Get the ping to a location based on its location code
     rpc GetPingForLocation (LocationInfoMessage) returns (PingResultMessage);
 
+    // Get the ping of the nearest benchmark location to a given IP address
+    rpc GetPingForIp (IpAddressMessage) returns (PingResultMessage);
+
     // Get the location with the highest ping among the benchmark locations
     rpc GetMaxPingLocation (google.protobuf.Empty) returns (PingResultMessage);
 
@@ -56,14 +59,12 @@ message PingResultMessage {
 }
 
 message AddPingLocationMessage {
-    // The location information for the new benchmark location
-    LocationInfoMessage Location = 1;
 
     // The IP address to ping for the new benchmark location
-    string IpAddress = 2;
+    string IpAddress = 1;
 
     // Description of the IP, eg. owner or datacenter name
-    string Name = 3;
+    string Name = 2;
 }
 
 message LocationInfoMessage {
@@ -73,4 +74,10 @@ message LocationInfoMessage {
 
     // ISO 3166-1 alpha-2 country code
     string CountryCode = 2;
+}
+
+message IpAddressMessage {
+
+    // IPV4 address of a host
+    string IpAddress = 1;
 }

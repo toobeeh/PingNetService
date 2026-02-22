@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PingNetService.Config;
 using PingNetService.Database;
 using PingNetService.Grpc;
 using PingNetService.Service;
@@ -36,6 +37,9 @@ class Program
         builder.Services.AddLogging();
         builder.Services.AddScoped<PingService>();
         builder.Services.AddScoped<LocationService>();
+        builder.Services.AddSingleton<GeoService>();
+        
+        builder.Services.Configure<GeoConfig>(builder.Configuration.GetRequiredSection("Geo"));
 
         var app = builder.Build();
 
