@@ -6,4 +6,4 @@ riderModule.iml
 .idea
 *.sln
 *.sln.*
-PingNetService/data
+tobeh.PingNetService.Server/data
