@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+option csharp_namespace = "tobeh.PingNetService";
+
+enum LookupMode {
+
+    // The ping was obtained based on the region code of the location
+    Region = 0;
+
+    // The ping was obtained by the min ping of the location's country (fallback for region)
+    Country = 1;
+
+    // The ping was obtained by the min ping of the location's continent (fallback for country)
+    Continent = 2;
+
+    // The ping was obtained by the min ping of all locations (fallback for continent)
+    Global = 3;
+}
+
+package pingnet;
+
+service PingNet {
+
+    // Get the ping to a location based on its location code
+    rpc GetPingForLocation (LocationInfoMessage) returns (PingResultMessage);
+
+    // Get the location with the highest ping among the benchmark locations
+    rpc GetMaxPingLocation (google.protobuf.Empty) returns (PingResultMessage);
+
+    // Get the location with the lowest ping among the benchmark locations
+    rpc GetMinPingLocation (google.protobuf.Empty) returns (PingResultMessage);
+
+    // Add a new benchmark location to the ping list by providing its location code and an IP address to ping
+    rpc AddPingLocation (AddPingLocationMessage) returns (PingResultMessage);
+
+    // Remove a benchmark location from the ping list by providing its location code
+    rpc RemovePingLocation (LocationInfoMessage) returns (google.protobuf.Empty);
+
+    // Get the ping to all benchmark locations
+    rpc GetAllPingLocations (google.protobuf.Empty) returns (stream PingResultMessage);
+
+    // Refresh the ping to all benchmark locations and update the stored ping values
+    rpc RefreshPingLocations (google.protobuf.Empty) returns (google.protobuf.Empty);
+}
+
+message PingResultMessage {
+    // The ping in milliseconds to the location
+    int64 PingMs = 1;
+
+    // The location information for which the ping was measured
+    LocationInfoMessage Location = 2;
+
+    // The mode used for the ping lookup (e.g., region-based or country-based as fallback)
+    LookupMode LookupMode = 3;
+}
+
+message AddPingLocationMessage {
+    // The location information for the new benchmark location
+    LocationInfoMessage Location = 1;
+
+    // The IP address to ping for the new benchmark location
+    string IpAddress = 2;
+
+    // Description of the IP, eg. owner or datacenter name
+    string Name = 3;
+}
+
+message LocationInfoMessage {
+
+    // ISO 3166-2 subdivision code
+    string RegionCode = 1;
+
+    // ISO 3166-1 alpha-2 country code
+    string CountryCode = 2;
+}
